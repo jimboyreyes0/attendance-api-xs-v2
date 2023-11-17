@@ -10,6 +10,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const routes = require("./routes/main-route");
 
+app.use((req, res, next) => {
+  console.log("Setting CORS Headers...");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "POST, PUT, PATCH, GET, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  console.log(`Headers set:`, res.getHeaders());
+  next();
+});
+
 // Routes
 app.use("/api/v2", routes);
 
