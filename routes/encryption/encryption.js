@@ -8,7 +8,6 @@ const AttendanceModel = require("../../models/Attendance");
 
 const {
   encryptEmployeeId,
-  decryptEmployeeId,
 } = require("../../controllers/encryption/encryption");
 
 const router = express.Router();
@@ -33,12 +32,4 @@ router.post(
   inputValidation,
   encryptEmployeeId
 );
-
-router.post(
-  "/decrypter",
-  [body("employeeID").notEmpty().withMessage("Employee Id cannot be blank")],
-  inputValidation,
-  decryptEmployeeId
-);
-
 module.exports = router;

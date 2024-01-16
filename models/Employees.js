@@ -35,10 +35,10 @@ const EmployeesModel = sequelizeConnection.define(
   }
 );
 
-AttendanceModel.belongsTo(EmployeesModel, {
-  foreignKey: "employee",
-  targetKey: "emp_no",
-  as: "employeeNo",
-});
+// AttendanceModel.belongsTo(EmployeesModel, {
+//   foreignKey: "employee",
+//   targetKey: "emp_no",
+//   as: "employeeNo",
+// });
 
 module.exports = EmployeesModel;

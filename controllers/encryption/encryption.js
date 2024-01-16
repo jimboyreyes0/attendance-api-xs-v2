@@ -1,23 +1,44 @@
-const CryptoJS = require("crypto-js");
-
-const {
-  encryptLink,
-  decryptLink,
-  getSecretKey,
-} = require("../../helpers/encryption");
+const jwt = require("jsonwebtoken");
+const UserTokens = require("../../models/UserTokens");
+const Employees = require("../../models/Employees");
+const errorHandler = require("../../helpers/errorHandler");
 
 exports.encryptEmployeeId = (req, res, next) => {
   const { employeeID } = req.body;
+  const secretKey = process.env.SECRETKEY;
 
-  const encryptedEmployee = encryptLink(employeeID.toString());
+  Employees.findOne({
+    where: {
+      emp_no: employeeID,
+    },
+  })
+    .then((isExist) => {
+      if (!isExist) {
+        return errorHandler("Employee Id not found.");
+      }
+      const token = jwt.sign(
+        {
+          employee_id: employeeID,
+        },
+        secretKey,
+        {
+          expiresIn: "5m",
+        }
+      );
 
-  res.status(200).send({ success: true, encrypted: encryptedEmployee });
-};
-
-exports.decryptEmployeeId = (req, res, next) => {
-  const { employeeID } = req.body;
-
-  const decryptedEmployee = decryptLink(employeeID.toString());
-
-  res.status(200).send({ success: true, decrypted: decryptedEmployee });
+      UserTokens.create({
+        user_id: employeeID,
+        token,
+        dateTime: new Date(),
+      })
+        .then(() => {
+          res.status(200).send({ success: true, encrypted: token });
+        })
+        .catch((err) => {
+          next(err);
+        });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };

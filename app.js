@@ -5,6 +5,8 @@ const sequelizeConnection = require("./connection/connect");
 
 const app = express();
 
+require("./services/token");
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -17,6 +19,7 @@ app.use((req, res, next) => {
     "POST, PUT, PATCH, GET, DELETE, OPTIONS"
   );
   res.setHeader("Access-Control-Allow-Headers", "*");
+  // res.setHeader("Access-Control-Allow-Origin", "*");
   console.log(`Headers set:`, res.getHeaders());
   next();
 });

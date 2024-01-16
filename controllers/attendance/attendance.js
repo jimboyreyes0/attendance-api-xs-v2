@@ -1,37 +1,41 @@
 const AttendanceModel = require("../../models/Attendance");
 const EmployeesModel = require("../../models/Employees");
 
-const { decryptLink } = require("../../helpers/encryption");
 const errorHandler = require("../../helpers/errorHandler");
 
 exports.timeInOut = async (req, res, next) => {
   try {
-    const { data } = req.body;
-    const employeeId = decryptLink(data);
+    const { employeeID } = req;
     const ipAddress = req.ip;
 
-    //   Check if Employee Exists
+    const currentDate = new Date();
+
+    const date = currentDate.toLocaleDateString('en-US', { timeZone: 'Asia/Singapore' });
+    const time = currentDate.toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false });
+
+
     const employeeData = await EmployeesModel.findOne({
       where: {
-        emp_no: employeeId,
+        emp_no: employeeID,
       },
     });
     if (!employeeData) {
-      errorHandler("Employee Id does not exists!");
+      return errorHandler("Employee Id does not exists!");
     }
 
     const lastRecord = await AttendanceModel.findOne({
       where: {
-        employee: employeeId,
+        employee: employeeID,
       },
       order: [["id", "DESC"]],
     });
 
-    // Function to create and save a new record
     const createAndSaveRecord = async (attendanceType) => {
       const newRecord = new AttendanceModel({
-        employee: employeeId,
+        employee: employeeID,
         attendance_type: attendanceType,
+        date: date,
+        time: time,
         ip_address: ipAddress,
       });
 
@@ -48,7 +52,6 @@ exports.timeInOut = async (req, res, next) => {
       });
     };
 
-    // No previous record found, create a new time-in
     if (!lastRecord) {
       await createAndSaveRecord(1);
     } else {
@@ -64,14 +67,12 @@ exports.timeInOut = async (req, res, next) => {
 };
 
 exports.getAttendanceRecords = async (req, res, next) => {
-  const { employeeId: encryptedEmpId } = req.params;
+  const { employeeID } = req;
 
-  const employeeId = decryptLink(encryptedEmpId);
 
-  //   Check if Employee Exists
   const employeeData = await EmployeesModel.findOne({
     where: {
-      emp_no: employeeId,
+      emp_no: employeeID,
     },
   });
   if (!employeeData) {
@@ -80,7 +81,7 @@ exports.getAttendanceRecords = async (req, res, next) => {
 
   AttendanceModel.findAll({
     where: {
-      employee: employeeId,
+      employee: employeeID,
     },
     order: [["id", "DESC"]],
   })
