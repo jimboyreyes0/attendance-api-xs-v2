@@ -10,9 +10,17 @@ exports.timeInOut = async (req, res, next) => {
 
     const currentDate = new Date();
 
-    const date = currentDate.toLocaleDateString('en-US', { timeZone: 'Asia/Singapore' });
-    const time = currentDate.toLocaleTimeString('en-US', { timeZone: 'Asia/Singapore', hour12: false });
+    const date = currentDate.toLocaleDateString("en-US", {
+      timeZone: "Asia/Singapore",
+    });
+    let time = currentDate.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Singapore",
+      hour12: false,
+    });
 
+    if (currentDate.getHours() === 0) {
+      time = "00" + time.slice(2);
+    }
 
     const employeeData = await EmployeesModel.findOne({
       where: {
@@ -69,7 +77,6 @@ exports.timeInOut = async (req, res, next) => {
 exports.getAttendanceRecords = async (req, res, next) => {
   const { employeeID } = req;
 
-
   const employeeData = await EmployeesModel.findOne({
     where: {
       emp_no: employeeID,
@@ -96,7 +103,7 @@ exports.getAttendanceRecords = async (req, res, next) => {
       res.status(200).json({ success: true, records: responseJson });
     })
     .catch((err) => {
-      if(!err.statusCode) {
+      if (!err.statusCode) {
         err.statusCode = 500;
       }
       next(err);
